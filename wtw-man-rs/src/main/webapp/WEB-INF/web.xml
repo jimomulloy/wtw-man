@@ -1,0 +1,41 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0">
+
+	<context-param>
+		<param-name>spring.profiles.active</param-name>
+		<param-value>jpa</param-value>
+		<!-- Available profiles: <param-value>jdbc</param-value> <param-value>jpa</param-value> 
+			(in the case of plain JPA) <param-value>spring-data-jpa</param-value> (in 
+			the case of Spring Data JPA) -->
+	</context-param>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+      		classpath:spring/wtwgeoclient.xml
+      		classpath:spring/wtwbaseclient.xml
+      		classpath:spring/wtwman.xml
+   		</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/log4j.properties</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>log4jExposeWebAppRoot</param-name>
+		<param-value>false</param-value>
+	</context-param>
+
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+</web-app>
