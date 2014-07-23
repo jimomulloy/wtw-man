@@ -35,6 +35,36 @@
 			<artifactId>wtw-man-director</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+			<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>wtw-geo-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>wtw-geo-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+			<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>wtw-station-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>wtw-station-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+			<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>wtw-base-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>wtw-base-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-spring3</artifactId>
@@ -86,21 +116,7 @@
 			<version>1.1.1</version>
 		</dependency>
 		<!-- Jackson JSON Processor -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-jaxb-annotations</artifactId>
-			<version>2.2.1</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>

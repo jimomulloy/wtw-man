@@ -15,7 +15,9 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
       		classpath:spring/wtwgeoclient.xml
+      		classpath:spring/wtwstationclient.xml
       		classpath:spring/wtwbaseclient.xml
+      		classpath:spring/wtwmandirector.xml
       		classpath:spring/wtwman.xml
    		</param-value>
 	</context-param>
