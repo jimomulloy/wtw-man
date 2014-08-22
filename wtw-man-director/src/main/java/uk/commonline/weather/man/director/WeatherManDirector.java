@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.stereotype.Component;
+
 import uk.commonline.weather.geo.service.GeoLocationService;
 import uk.commonline.weather.man.service.WeatherManDirectorService;
 import uk.commonline.weather.model.Weather;
@@ -15,6 +17,7 @@ import uk.commonline.weather.persist.WeatherDAO;
 import uk.commonline.weather.persist.WeatherForecastDAO;
 import uk.commonline.weather.station.service.WeatherStationService;
 
+@Component
 public class WeatherManDirector implements WeatherManDirectorService {
 
     @Inject
@@ -29,6 +32,7 @@ public class WeatherManDirector implements WeatherManDirectorService {
     @Inject
     private GeoLocationService geoLocationService;
 
+    @Inject
     private WeatherRequestControl weatherRequestControl;
 
     public WeatherDAO getWeatherDAO() {
@@ -37,11 +41,6 @@ public class WeatherManDirector implements WeatherManDirectorService {
 
     public void setWeatherDAO(WeatherDAO weatherDAO) {
 	this.weatherDAO = weatherDAO;
-    }
-
-    public WeatherManDirector() {
-	weatherRequestControl = new WeatherRequestControl();
-	weatherRequestControl.setDirector(this);
     }
 
     public WeatherReport updateWeather(double latitude, double longitude) throws Exception {
