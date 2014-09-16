@@ -26,9 +26,9 @@ public class StationIntegrationTest extends TestCase {
 
     // @Test
     public void test() throws Exception {
-	System.out.println("!!Before Weather 50,0:");
-	WeatherReport report = weatherStationClient.getWeatherReport(50, 0);
-	System.out.println("!!Weather 50,0 region:" + report.getRegion());
-	// assertEquals("Invalid region", 1, region);
+        System.out.println("!!Before Weather 50,0:");
+        WeatherReport report = weatherStationClient.getWeatherReport(50, 0);
+        System.out.println("!!Weather 50,0 region:" + report.getRegion());
+        // assertEquals("Invalid region", 1, region);
     }
 }

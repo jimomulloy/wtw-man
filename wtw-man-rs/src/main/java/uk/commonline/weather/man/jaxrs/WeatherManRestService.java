@@ -1,6 +1,6 @@
 package uk.commonline.weather.man.jaxrs;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.commonline.weather.man.service.WeatherManDirectorService;
 import uk.commonline.weather.model.Location;
-import uk.commonline.weather.model.Weather;
 import uk.commonline.weather.model.WeatherReport;
 
 /**
@@ -29,31 +28,37 @@ public class WeatherManRestService {
     @Autowired
     WeatherManDirectorService weatherManDirectorService;
 
-    protected WeatherManDirectorService getService() {
-	return weatherManDirectorService;
-    }
-
-    public void setWeatherManDirectorService(WeatherManDirectorService weatherManDirectorService) {
-	this.weatherManDirectorService = weatherManDirectorService;
+    @GET
+    @Path("regions")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Set<Long> getActiveRegions() {
+        return weatherManDirectorService.getActiveRegions();
     }
 
     public Class<Location> getEiClass() {
-	return Location.class;
+        return Location.class;
+    }
+
+    protected WeatherManDirectorService getService() {
+        return weatherManDirectorService;
     }
 
     @GET
     @Path("report/lat/{lat}/long/{long}")
     @Produces(MediaType.APPLICATION_JSON)
     public WeatherReport getWeatherReport(@PathParam("lat") double latitude, @PathParam("long") double longitude) throws Exception {
-	return weatherManDirectorService.getWeatherReport(latitude, longitude);
+        return weatherManDirectorService.getWeatherReport(latitude, longitude);
+    }
+
+    public void setWeatherManDirectorService(WeatherManDirectorService weatherManDirectorService) {
+        this.weatherManDirectorService = weatherManDirectorService;
     }
 
     @POST
     @Path("update/lat/{lat}/long/{long}")
     @Produces(MediaType.APPLICATION_JSON)
     public WeatherReport updateWeather(@PathParam("lat") double latitude, @PathParam("long") double longitude) throws Exception {
-	WeatherReport report = weatherManDirectorService.updateWeather(latitude, longitude);
-	System.out.println("!!Report returning size:"+report.getSourceMap().size());
-	return report;
+        WeatherReport report = weatherManDirectorService.updateWeather(latitude, longitude);
+        return report;
     }
 }

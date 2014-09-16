@@ -1,10 +1,14 @@
 package uk.commonline.weather.man.service;
 
+import java.util.Set;
+
 import uk.commonline.weather.model.WeatherReport;
 
 public interface WeatherManDirectorService {
-	
-	WeatherReport updateWeather(double latitude, double longitude) throws Exception;
-	
-	WeatherReport getWeatherReport(double latitude, double longitude) throws Exception;
+
+    Set<Long> getActiveRegions();
+
+    WeatherReport getWeatherReport(double latitude, double longitude) throws Exception;
+
+    WeatherReport updateWeather(double latitude, double longitude) throws Exception;
 }

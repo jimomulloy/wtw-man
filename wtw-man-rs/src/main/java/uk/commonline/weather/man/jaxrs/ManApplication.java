@@ -12,8 +12,8 @@ public class ManApplication extends ResourceConfig {
     public ManApplication() {
         packages("uk.commonline.weather.man.jaxrs;uk.commonline.weather.model;org.codehaus.jackson.jaxrs");
 
-        // Enable LoggingFilter & output entity.     
+        // Enable LoggingFilter & output entity.
         registerInstances(new LoggingFilter(Logger.getLogger(ManApplication.class.getName()), true));
- 
+
     }
 }

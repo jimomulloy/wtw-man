@@ -21,10 +21,6 @@ public class BaseIntegrationTest extends TestCase {
     @Autowired
     WeatherDAO weatherDAO;
 
-    public void setWeatherDAO(WeatherDAO weatherDAO) {
-	this.weatherDAO = weatherDAO;
-    }
-
     @Inject
     private WeatherStationClient weatherStationClient;
 
@@ -33,13 +29,17 @@ public class BaseIntegrationTest extends TestCase {
 
     }
 
+    public void setWeatherDAO(WeatherDAO weatherDAO) {
+        this.weatherDAO = weatherDAO;
+    }
+
     // @Test
     public void test() throws Exception {
 
-	Weather weather = new Weather();
-	weather.setSource("Hi2");
-	weather.setRegion(12);
-	weather = weatherDAO.create(weather);
-	System.out.println("!!Created weather:" + weather.getId());
+        Weather weather = new Weather();
+        weather.setSource("Hi2");
+        weather.setRegion(12);
+        weather = weatherDAO.create(weather);
+        System.out.println("!!Created weather:" + weather.getId());
     }
 }
