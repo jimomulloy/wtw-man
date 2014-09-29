@@ -82,49 +82,20 @@ public class WeatherRequestControl {
 
                     for (WeatherSourceData wsd : sm.values()) {
                         List<Weather> ws = wsd.getRecordings();
-                        List<Weather> rws = director.getWeatherDAO().recentForRegion(report.getRegion());
-                        List<WeatherForecast> rfs = director.getWeatherForecastDAO().recentForRegion(report.getRegion());
-                        boolean sourceFound = false;
                         for (Weather w : ws) {
                             if (w.getId() == null) {
-                                for (Weather rw : rws) {
-                                    if (w.getSource().equals(rw.getSource())) {
-                                        sourceFound = true;
-                                        if (w.getSourceTime().getTime() > rw.getSourceTime().getTime()) {
-                                            w.setBackReferences();
-                                            w.setRegion(report.getRegion());
-                                            director.getWeatherDAO().create(w);
-                                        }
-                                    }
-                                }
-                                if (!sourceFound) {
-                                    w.setBackReferences();
-                                    w.setRegion(report.getRegion());
-                                    director.getWeatherDAO().create(w);
-                                }
+                                w.setBackReferences();
+                                w.setRegion(report.getRegion());
+                                director.getWeatherDAO().create(w);
                             }
-                            sourceFound = false;
                         }
                         List<WeatherForecast> fs = wsd.getForecasts();
                         for (WeatherForecast f : fs) {
                             if (f.getId() == null) {
-                                for (WeatherForecast rf : rfs) {
-                                    if (f.getSource().equals(rf.getSource())) {
-                                        sourceFound = true;
-                                        if (f.getSourceTime().getTime() > rf.getSourceTime().getTime()) {
-                                            f.setBackReferences();
-                                            f.setRegion(report.getRegion());
-                                            director.getWeatherForecastDAO().create(f);
-                                        }
-                                    }
-                                }
-                                if (!sourceFound) {
-                                    f.setBackReferences();
-                                    f.setRegion(report.getRegion());
-                                    director.getWeatherForecastDAO().create(f);
-                                }
+                                f.setBackReferences();
+                                f.setRegion(report.getRegion());
+                                director.getWeatherForecastDAO().create(f);
                             }
-                            sourceFound = false;
                         }
                     }
                     log.info("Exit BaseActor region:" + report.getRegion() + ", time:" + System.currentTimeMillis() + ", event:" + event);
@@ -310,7 +281,7 @@ public class WeatherRequestControl {
                 if (event instanceof LookupReportCacheEvent) {
                     long region = ((LookupReportCacheEvent) event).getRegion();
                     Requestor requestor = ((LookupReportCacheEvent) event).getThreadTester();
-                    if (reportCache.containsKey(region) && reportCache.get(region) != null) {
+                    if (reportCache.containsKey(region) && reportCache.get(region) != null ) {
                         ReportCacheEntry reportCacheEntry = reportCache.get(region);
                         if (reportCacheEntry.timeUpdate > (timeNow - 60 * 60 * 1000)) {
                             requestor.reportCompleted(reportCacheEntry.report);
@@ -327,8 +298,7 @@ public class WeatherRequestControl {
                         reportCache.put(region, reportCacheEntry);
                         log.info("Report not found in Lookup ReportCache region:" + region + ", time:" + System.currentTimeMillis() + ", event:"
                                 + event);
-                        //EventBusService.$().postEvent(new LookupBaseEvent(region));
-                        EventBusService.$().postEvent(new UpdateStationEvent(region));
+                        EventBusService.$().postEvent(new LookupBaseEvent(region));
                     }
                 } else if (event instanceof UpdateReportCacheEvent) {
                     WeatherReport report = ((UpdateReportCacheEvent) event).getReport();
