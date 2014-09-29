@@ -10,5 +10,4 @@ public interface WeatherManDirectorService {
 
     WeatherReport getWeatherReport(double latitude, double longitude) throws Exception;
 
-    WeatherReport updateWeather(double latitude, double longitude) throws Exception;
 }

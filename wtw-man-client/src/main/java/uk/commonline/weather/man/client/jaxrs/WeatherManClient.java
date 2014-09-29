@@ -46,13 +46,4 @@ public class WeatherManClient extends AbstractCrudClient<Weather> implements Wea
         restClient.resetClient();
     }
 
-    @Override
-    public WeatherReport updateWeather(double latitude, double longitude) throws Exception {
-        WeatherReport report = getRestClient().getClient().register(WeatherReportMessenger.class)
-                .target(getRestClient().createUrl("http://localhost:8080/wtwman/webresources/")).path(getPath()).path("update/lat/{lat}/long/{long}")
-                .resolveTemplate("lat", latitude).resolveTemplate("long", longitude).request()
-                .post(Entity.entity(null, MediaType.APPLICATION_JSON), WeatherReport.class);
-        return report;
-    }
-
 }

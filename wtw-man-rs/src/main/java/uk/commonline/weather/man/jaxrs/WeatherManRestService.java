@@ -53,12 +53,4 @@ public class WeatherManRestService {
     public void setWeatherManDirectorService(WeatherManDirectorService weatherManDirectorService) {
         this.weatherManDirectorService = weatherManDirectorService;
     }
-
-    @POST
-    @Path("update/lat/{lat}/long/{long}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public WeatherReport updateWeather(@PathParam("lat") double latitude, @PathParam("long") double longitude) throws Exception {
-        WeatherReport report = weatherManDirectorService.updateWeather(latitude, longitude);
-        return report;
-    }
 }

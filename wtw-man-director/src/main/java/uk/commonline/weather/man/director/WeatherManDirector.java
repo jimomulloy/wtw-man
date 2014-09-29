@@ -1,10 +1,8 @@
 package uk.commonline.weather.man.director;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -14,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import uk.commonline.weather.geo.service.GeoLocationService;
 import uk.commonline.weather.man.service.WeatherManDirectorService;
-import uk.commonline.weather.model.Weather;
 import uk.commonline.weather.model.WeatherReport;
+import uk.commonline.weather.model.WeatherReport.WeatherSourceData;
 import uk.commonline.weather.persist.WeatherDAO;
 import uk.commonline.weather.persist.WeatherForecastDAO;
 import uk.commonline.weather.station.service.WeatherStationService;
@@ -60,19 +58,17 @@ public class WeatherManDirector implements WeatherManDirectorService {
 
     @Override
     public WeatherReport getWeatherReport(double latitude, double longitude) throws Exception {
-        long region = geoLocationService.getRegion(latitude, longitude);
         WeatherReport report = new WeatherReport();
-        Map<String, List<Weather>> sourceMap = new HashMap<String, List<Weather>>();
-        List<Weather> weathers = weatherDAO.recentForRegion(region);
-        for (Weather weather : weathers) {
-            if (!sourceMap.containsKey(weather.getSource())) {
-                sourceMap.put(weather.getSource(), new ArrayList<Weather>());
-            }
-            sourceMap.get(weather.getSource()).add(weather);
-        }
+        long region = geoLocationService.getRegion(latitude, longitude);
+        report = weatherRequestControl.updateWeather(region);
         report.setLatitude(latitude);
         report.setLongitude(longitude);
         report.setDate(new Date());
+       
+        Map<String, WeatherSourceData> sm = report.getSourceMap();
+        for (Entry<String, WeatherSourceData> wse : sm.entrySet()) {
+            log.debug("Got Report for source:"+wse.getKey()+", #recordings:"+wse.getValue().getRecordings().size()+", #forecasts:"+wse.getValue().getForecasts().size());
+        }
         return report;
     }
 
@@ -96,14 +92,4 @@ public class WeatherManDirector implements WeatherManDirectorService {
         this.weatherStationService = weatherStationService;
     }
 
-    @Override
-    public WeatherReport updateWeather(double latitude, double longitude) throws Exception {
-        WeatherReport report = new WeatherReport();
-        long region = geoLocationService.getRegion(latitude, longitude);
-        report = weatherRequestControl.updateWeather(region);
-        report.setLatitude(latitude);
-        report.setLongitude(longitude);
-        report.setDate(new Date());
-        return report;
-    }
 }

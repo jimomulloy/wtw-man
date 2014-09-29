@@ -1,7 +1,6 @@
 package uk.commonline.weather.man.director;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,52 @@ import com.google.common.eventbus.Subscribe;
 @Component
 public class WeatherRequestControl {
 
+    private static Logger log = Logger.getLogger(WeatherRequestControl.class);
+
+    @Inject
+    private WeatherManDirector director;
+
+    private Map<Long, ReportCacheEntry> reportCache = new HashMap<Long, ReportCacheEntry>();
+
+    public WeatherRequestControl() {
+        EventBusService.$().registerSubscriber(new ReportCacheActor());
+        EventBusService.$().registerSubscriber(new BaseActor());
+        EventBusService.$().registerSubscriber(new StationActor());
+        EventBusService.$().registerSubscriber(new RefreshActor());
+    }
+
+    public WeatherManDirector getDirector() {
+        return director;
+    }
+
+    public Set<Long> getRegions() {
+        return reportCache.keySet();
+    }
+
+    public WeatherManDirector getWeatherManDirector() {
+        return director;
+    }
+
+    @Scheduled(fixedRate = 120000)
+    public void refresh() throws Exception {
+        EventBusService.$().postEvent(new RefreshReportCacheEvent());
+        updateWeather(223054);
+    }
+
+    public void setDirector(WeatherManDirector director) {
+        this.director = director;
+    }
+
+    public void setWeatherManDirector(WeatherManDirector director) {
+        this.director = director;
+    }
+
+    public WeatherReport updateWeather(long region) throws Exception {
+        Requestor tt = new Requestor();
+        tt.request(region);
+        return tt.getReport();
+    }
+
     public class BaseActor {
         @Subscribe
         @AllowConcurrentEvents
@@ -37,20 +82,49 @@ public class WeatherRequestControl {
 
                     for (WeatherSourceData wsd : sm.values()) {
                         List<Weather> ws = wsd.getRecordings();
+                        List<Weather> rws = director.getWeatherDAO().recentForRegion(report.getRegion());
+                        List<WeatherForecast> rfs = director.getWeatherForecastDAO().recentForRegion(report.getRegion());
+                        boolean sourceFound = false;
                         for (Weather w : ws) {
                             if (w.getId() == null) {
-                                w.setBackReferences();
-                                w.setRegion(report.getRegion());
-                                director.getWeatherDAO().create(w);
+                                for (Weather rw : rws) {
+                                    if (w.getSource().equals(rw.getSource())) {
+                                        sourceFound = true;
+                                        if (w.getSourceTime().getTime() > rw.getSourceTime().getTime()) {
+                                            w.setBackReferences();
+                                            w.setRegion(report.getRegion());
+                                            director.getWeatherDAO().create(w);
+                                        }
+                                    }
+                                }
+                                if (!sourceFound) {
+                                    w.setBackReferences();
+                                    w.setRegion(report.getRegion());
+                                    director.getWeatherDAO().create(w);
+                                }
                             }
+                            sourceFound = false;
                         }
                         List<WeatherForecast> fs = wsd.getForecasts();
                         for (WeatherForecast f : fs) {
                             if (f.getId() == null) {
-                                f.setBackReferences();
-                                f.setRegion(report.getRegion());
-                                director.getWeatherForecastDAO().create(f);
+                                for (WeatherForecast rf : rfs) {
+                                    if (f.getSource().equals(rf.getSource())) {
+                                        sourceFound = true;
+                                        if (f.getSourceTime().getTime() > rf.getSourceTime().getTime()) {
+                                            f.setBackReferences();
+                                            f.setRegion(report.getRegion());
+                                            director.getWeatherForecastDAO().create(f);
+                                        }
+                                    }
+                                }
+                                if (!sourceFound) {
+                                    f.setBackReferences();
+                                    f.setRegion(report.getRegion());
+                                    director.getWeatherForecastDAO().create(f);
+                                }
                             }
+                            sourceFound = false;
                         }
                     }
                     log.info("Exit BaseActor region:" + report.getRegion() + ", time:" + System.currentTimeMillis() + ", event:" + event);
@@ -133,17 +207,6 @@ public class WeatherRequestControl {
         }
     }
 
-    private static class ForecastTimeComparator implements Comparator<WeatherForecast> {
-        @Override
-        public int compare(WeatherForecast o1, WeatherForecast o2) {
-            if (o2.getWriteTime().equals(o1.getWriteTime())) {
-                return o2.getPeriodFrom().compareTo(o1.getPeriodFrom());
-            } else {
-                return o2.getWriteTime().compareTo(o1.getWriteTime());
-            }
-        }
-    }
-
     public class LookupBaseEvent extends BaseEvent {
         long region;
 
@@ -187,8 +250,8 @@ public class WeatherRequestControl {
     }
 
     class Process implements Runnable {
-        private Requestor requestor;
         private long region;
+        private Requestor requestor;
 
         public Process(Requestor requestor, long region) {
             this.requestor = requestor;
@@ -246,7 +309,6 @@ public class WeatherRequestControl {
                 long timeNow = new Date().getTime();
                 if (event instanceof LookupReportCacheEvent) {
                     long region = ((LookupReportCacheEvent) event).getRegion();
-                    log.info("@@@@@!!handleReportCacheEvent:" + region + ", event: LookupReportCacheEvent");
                     Requestor requestor = ((LookupReportCacheEvent) event).getThreadTester();
                     if (reportCache.containsKey(region) && reportCache.get(region) != null) {
                         ReportCacheEntry reportCacheEntry = reportCache.get(region);
@@ -265,7 +327,8 @@ public class WeatherRequestControl {
                         reportCache.put(region, reportCacheEntry);
                         log.info("Report not found in Lookup ReportCache region:" + region + ", time:" + System.currentTimeMillis() + ", event:"
                                 + event);
-                        EventBusService.$().postEvent(new LookupBaseEvent(region));
+                        //EventBusService.$().postEvent(new LookupBaseEvent(region));
+                        EventBusService.$().postEvent(new UpdateStationEvent(region));
                     }
                 } else if (event instanceof UpdateReportCacheEvent) {
                     WeatherReport report = ((UpdateReportCacheEvent) event).getReport();
@@ -304,10 +367,10 @@ public class WeatherRequestControl {
     }
 
     public class ReportCacheEntry {
-        public List<Requestor> requests;
-        public long timeUpdate;
-        public long timeAccess;
         public WeatherReport report;
+        public List<Requestor> requests;
+        public long timeAccess;
+        public long timeUpdate;
 
     }
 
@@ -315,8 +378,8 @@ public class WeatherRequestControl {
     }
 
     public class Requestor {
-        private Object synchObj = new Object();
         WeatherReport report;
+        private Object synchObj = new Object();
 
         public WeatherReport getReport() {
             return report;
@@ -415,59 +478,6 @@ public class WeatherRequestControl {
         public void setRegion(long region) {
             this.region = region;
         }
-    }
-
-    private static class WeatherTimeComparator implements Comparator<Weather> {
-        @Override
-        public int compare(Weather o1, Weather o2) {
-            return o2.getWriteTime().compareTo(o1.getWriteTime());
-        }
-    }
-
-    private static Logger log = Logger.getLogger(WeatherRequestControl.class);
-
-    private Map<Long, ReportCacheEntry> reportCache = new HashMap<Long, ReportCacheEntry>();
-
-    @Inject
-    private WeatherManDirector director;
-
-    public WeatherRequestControl() {
-        EventBusService.$().registerSubscriber(new ReportCacheActor());
-        EventBusService.$().registerSubscriber(new BaseActor());
-        EventBusService.$().registerSubscriber(new StationActor());
-        EventBusService.$().registerSubscriber(new RefreshActor());
-    }
-
-    public WeatherManDirector getDirector() {
-        return director;
-    }
-
-    public Set<Long> getRegions() {
-        return reportCache.keySet();
-    }
-
-    public WeatherManDirector getWeatherManDirector() {
-        return director;
-    }
-
-    @Scheduled(fixedRate = 120000)
-    public void refresh() throws Exception {
-        EventBusService.$().postEvent(new RefreshReportCacheEvent());
-        updateWeather(223054);
-    }
-
-    public void setDirector(WeatherManDirector director) {
-        this.director = director;
-    }
-
-    public void setWeatherManDirector(WeatherManDirector director) {
-        this.director = director;
-    }
-
-    public WeatherReport updateWeather(long region) throws Exception {
-        Requestor tt = new Requestor();
-        tt.request(region);
-        return tt.getReport();
     }
 
 }
