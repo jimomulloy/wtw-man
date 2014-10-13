@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
@@ -51,10 +52,15 @@ public class WeatherRequestControl {
         return director;
     }
 
+    @PostConstruct
+    public void init() throws Exception {
+        EventBusService.$().postEvent(new InitBaseEvent());
+    }
+
     @Scheduled(fixedRate = 120000)
     public void refresh() throws Exception {
         EventBusService.$().postEvent(new RefreshReportCacheEvent());
-        updateWeather(223054);
+        //updateWeather(223054);
     }
 
     public void setDirector(WeatherManDirector director) {
@@ -65,7 +71,7 @@ public class WeatherRequestControl {
         this.director = director;
     }
 
-    public WeatherReport updateWeather(long region) throws Exception {
+    public WeatherReport processReport(long region) throws Exception {
         Requestor tt = new Requestor();
         tt.request(region);
         return tt.getReport();
@@ -76,7 +82,16 @@ public class WeatherRequestControl {
         @AllowConcurrentEvents
         public void handleBaseEvent(BaseEvent event) {
             try {
-                if (event instanceof UpdateBaseEvent) {
+                if (event instanceof InitBaseEvent) {
+                    Date date = new Date();
+                    Long minutesAgo = new Long(60);
+                    Date date5DaysAgo = new Date(date.getTime() - minutesAgo * 60 * 1000 * 24 * 5);
+                    List<Long> regions = director.getWeatherDAO().recentRegions(date5DaysAgo);
+                    for(long region: regions){
+                        System.out.println("!!**!!??InitBaseEvent for region:"+region);
+                        processReport(region);
+                    }
+                } else if (event instanceof UpdateBaseEvent) {
                     WeatherReport report = ((UpdateBaseEvent) event).getReport();
                     Map<String, WeatherSourceData> sm = report.getSourceMap();
 
@@ -194,6 +209,10 @@ public class WeatherRequestControl {
         }
     }
 
+    public class InitBaseEvent extends BaseEvent {
+
+    }
+
     public class LookupReportCacheEvent extends ReportCacheEvent {
         long region;
         Requestor requestor;
@@ -281,7 +300,7 @@ public class WeatherRequestControl {
                 if (event instanceof LookupReportCacheEvent) {
                     long region = ((LookupReportCacheEvent) event).getRegion();
                     Requestor requestor = ((LookupReportCacheEvent) event).getThreadTester();
-                    if (reportCache.containsKey(region) && reportCache.get(region) != null ) {
+                    if (reportCache.containsKey(region) && reportCache.get(region) != null) {
                         ReportCacheEntry reportCacheEntry = reportCache.get(region);
                         if (reportCacheEntry.timeUpdate > (timeNow - 60 * 60 * 1000)) {
                             requestor.reportCompleted(reportCacheEntry.report);

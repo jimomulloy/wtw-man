@@ -60,7 +60,7 @@ public class WeatherManDirector implements WeatherManDirectorService {
     public WeatherReport getWeatherReport(double latitude, double longitude) throws Exception {
         WeatherReport report = new WeatherReport();
         long region = geoLocationService.getRegion(latitude, longitude);
-        report = weatherRequestControl.updateWeather(region);
+        report = weatherRequestControl.processReport(region);
         report.setLatitude(latitude);
         report.setLongitude(longitude);
         report.setDate(new Date());
