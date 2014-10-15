@@ -5,6 +5,11 @@ import java.util.concurrent.Executors;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 
+/**
+ * @author Jim O'Mulloy
+ * 
+ * WTW Manager Service that provides an instance of a Google Guava EventBus to process Weather report requests in a thread safe, reactive manner.
+ */
 public class EventBusService {
 
     private static EventBusService instance = new EventBusService();

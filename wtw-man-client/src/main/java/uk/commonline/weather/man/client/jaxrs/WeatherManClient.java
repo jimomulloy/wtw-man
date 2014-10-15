@@ -2,7 +2,6 @@ package uk.commonline.weather.man.client.jaxrs;
 
 import java.util.Set;
 
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 import uk.commonline.data.client.jaxrs.AbstractCrudClient;
@@ -15,8 +14,19 @@ import uk.commonline.weather.model.WeatherReport;
 import uk.commonline.weather.model.WeatherReportMessenger;
 
 /**
+ * @author Jim O'Mulloy
+ * 
+ *         JAXRS Client for WTW Manager Service.
+ *
  */
 public class WeatherManClient extends AbstractCrudClient<Weather> implements WeatherManDirectorService {
+
+    private static final String SERVICE_PATH = "wtwman/webresources/manager";
+
+    @Override
+    protected String getPath() {
+        return SERVICE_PATH;
+    }
 
     @Override
     public Set<Long> getActiveRegions() {
@@ -25,15 +35,10 @@ public class WeatherManClient extends AbstractCrudClient<Weather> implements Wea
     }
 
     @Override
-    protected String getPath() {
-        return "manager";
-    }
-
-    @Override
     public WeatherReport getWeatherReport(double latitude, double longitude) throws Exception {
-        WeatherReport report = getRestClient().getClient().register(WeatherReportMessenger.class)
-                .target(getRestClient().createUrl("http://localhost:8080/wtwman/webresources/")).path(getPath()).path("report/lat/{lat}/long/{long}")
-                .resolveTemplate("lat", latitude).resolveTemplate("long", longitude).request(MediaType.APPLICATION_JSON).get(WeatherReport.class);
+        WeatherReport report = getRestClient().getClient().register(WeatherReportMessenger.class).target(getRestClient().createUrl(getPath()))
+                .path("report/lat/{lat}/long/{long}").resolveTemplate("lat", latitude).resolveTemplate("long", longitude)
+                .request(MediaType.APPLICATION_JSON).get(WeatherReport.class);
         return report;
     }
 

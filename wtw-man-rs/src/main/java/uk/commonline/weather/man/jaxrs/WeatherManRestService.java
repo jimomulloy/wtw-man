@@ -18,11 +18,13 @@ import uk.commonline.weather.model.Location;
 import uk.commonline.weather.model.WeatherReport;
 
 /**
+ * @author Jim O'Mulloy
  * 
+ *         WTW Manager JAXRS Service
+ *
  */
 @Path("/manager")
 @Component
-@Transactional
 public class WeatherManRestService {
 
     @Autowired

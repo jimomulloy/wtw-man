@@ -18,6 +18,11 @@ import uk.commonline.weather.persist.WeatherDAO;
 import uk.commonline.weather.persist.WeatherForecastDAO;
 import uk.commonline.weather.station.service.WeatherStationService;
 
+/**
+ * @author Jim O'Mulloy
+ * 
+ * WTW Manager Director Service implementation that uses the Google Guava EventBus to process Weather report requests in a thread safe, reactive manner.
+ */
 @Component
 public class WeatherManDirector implements WeatherManDirectorService {
 
