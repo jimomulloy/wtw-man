@@ -36,7 +36,7 @@ public class WeatherManClient extends AbstractCrudClient<Weather> implements Wea
 
     @Override
     public WeatherReport getWeatherReport(double latitude, double longitude) throws Exception {
-        WeatherReport report = getRestClient().getClient().register(WeatherReportMessenger.class).target(getRestClient().createUrl(getPath()))
+        WeatherReport report = getRestClient().getClient().target(getRestClient().createUrl(getPath()))
                 .path("report/lat/{lat}/long/{long}").resolveTemplate("lat", latitude).resolveTemplate("long", longitude)
                 .request(MediaType.APPLICATION_JSON).get(WeatherReport.class);
         return report;
@@ -45,10 +45,10 @@ public class WeatherManClient extends AbstractCrudClient<Weather> implements Wea
     @Override
     public void setRestClient(RestClient restClient) {
         super.setRestClient(restClient);
-        restClient.registerProvider(WeatherListMessenger.class);
-        restClient.registerProvider(WeatherReportMessenger.class);
-        restClient.registerProvider(WeatherMessenger.class);
-        restClient.resetClient();
+        //restClient.registerProvider(WeatherListMessenger.class);
+        //restClient.registerProvider(WeatherReportMessenger.class);
+        //restClient.registerProvider(WeatherMessenger.class);
+        //restClient.resetClient();
     }
 
 }
